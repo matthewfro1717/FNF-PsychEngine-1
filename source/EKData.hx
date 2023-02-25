@@ -95,9 +95,9 @@ class EKData {
 		0.55, //7k
 		0.50, //8k
 		0.46, //9k
-		0.39, //10k
-		0.36, //11k
-		0.32, //12k
+	0.39, //10k
+	0.36, //11k
+	0.32, //12k
     ]; 
 	public static var lessX:Array<Int> = [
 		0, // 1k
@@ -109,9 +109,9 @@ class EKData {
 		7, //7k
 		8, //8k
 		8, //9k
-		7, //10k
-		6, //11k
-		6, //12k
+	7, //10k
+	6, //11k
+	6, //12k
     ];
 
     public static var noteSep:Array<Int> = [
@@ -157,7 +157,7 @@ class EKData {
         9, 
         10, 
         11, 
-        12,
+        12
     ];
 
     public static var restPosition:Array<Float> = [
@@ -440,9 +440,8 @@ class Keybinds
 				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_elev10')),
 				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_elev11'))
 			],
-			[
-
-                                ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_twel1')),
+            [
+                ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_twel1')),
 				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_twel2')),
 				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_twel3')),
 				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_twel4')),
@@ -453,11 +452,8 @@ class Keybinds
 				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_twel9')),
 				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_twel10')),
 				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_twel11')),
-                                ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_twel12'))
-			]
-	            ];
-                }
-            }
-        }
+                ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_twel12'))
+            ]
+		];
     }
 }
