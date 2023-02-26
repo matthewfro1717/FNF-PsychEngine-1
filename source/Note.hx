@@ -156,8 +156,6 @@ class Note extends FlxSprite
 
 	var notes = ['purple', 'blue', 'green', 'red'];
 
-	public var mania:Int = 1;
-
 	var ogW:Float;
 	var ogH:Float;
 
@@ -243,7 +241,6 @@ class Note extends FlxSprite
 		this.noteStyle = noteStyle;
 		this.isSustainNote = sustainNote;
 		this.originalType = noteData;
-		this.guitarSection = guitarSection;
 		this.noteData = noteData;
 
 		x += 78 - posRest[mania];
@@ -269,16 +266,9 @@ class Note extends FlxSprite
 		if (mania == 3) notes = ['purple', 'green', 'red', 'white', 'yellow', 'blue', 'dark'];
 		if (mania == 4) notes = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'black', 'dark'];
 		if (mania == 5) notes = ['purple', 'blue', 'green', 'red', 'pink', 'turq', 'emerald', 'lightred', 'yellow', 'violet', 'black', 'dark'];
-		if ((guitarSection && inCharter && noteData < 5) || (guitarSection)) notes = ['green', 'red', 'yellow', 'blue', 'orange'];
 
 		var notePathLol:String = 'notes/NOTE_assets';
-		noteSize = 
-			[mania];
-
-		if ((((CharactersWith3D.contains(PlayState.SONG.player2) && !musthit) || ((CharactersWith3D.contains(PlayState.SONG.player1)
-				|| CharactersWith3D.contains(PlayState.characteroverride) || CharactersWith3D.contains(PlayState.formoverride)) && musthit))
-				|| ((CharactersWith3D.contains(PlayState.SONG.player2) || CharactersWith3D.contains(PlayState.SONG.player1)) && ((this.strumTime / 50) % 20 > 10)))
-				&& this.noteStyle == 'normal')
+		noteSize = [mania];
 		{
 			this.noteStyle = '3D';
 			notePathLol = 'notes/NOTE_assets_3D';
@@ -304,8 +294,7 @@ class Note extends FlxSprite
 					this.noteStyle = 'recursed';
 					notePathLol = 'notes/NOTE_recursed';
 				}
-		}
-		if (guitarSection) this.noteStyle = 'guitarHero';
+		}\
 		switch (this.noteStyle)
 		{
 			default:
@@ -492,10 +481,6 @@ class Note extends FlxSprite
 		if (isInState('PlayState'))
 		{
 			var state:PlayState = cast(FlxG.state, PlayState);
-			if (state.localFunny == CharacterFunnyEffect.Dave)
-			{
-				str = 'cheating';
-			}
 		}
 		if(noteData > -1) {
 			texture = '';
@@ -805,6 +790,34 @@ class Note extends FlxSprite
 		{
 			if (alpha > 0.3)
 				alpha = 0.3;
+		}
+
+	public function SearchForStrum(musthit:Bool)
+	{
+		var state:PlayState = cast(FlxG.state, PlayState);
+		if (musthit)
+		{
+			state.playerStrums.forEach(function(spr:StrumNote)
+			{
+				if (spr.ID == notetolookfor)
+				{
+					GoToStrum(spr);
+					MyStrum = spr;
+					return;
+				}
+			});
+		}
+		else
+		{
+			state.dadStrums.forEach(function(spr:StrumNote)
+			{
+				if (spr.ID == notetolookfor)
+				{
+					GoToStrum(spr);
+					MyStrum = spr;
+					return;
+				}
+			});
 		}
 	}
 }
