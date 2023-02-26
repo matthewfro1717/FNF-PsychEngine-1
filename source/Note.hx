@@ -29,11 +29,9 @@ class Note extends FlxSprite
 	public static var minMania:Int = 0;
 	public static var maxMania:Int = 17; // key value is this + 1
 
-	public static var scales:Array<Float> = EKData.scales;
 	public static var lessX:Array<Int> = EKData.lessX;
 	public static var separator:Array<Int> = EKData.noteSep;
 	public static var xtra:Array<Float> = EKData.offsetX;
-	public static var posRest:Array<Float> = EKData.restPosition;
 	public static var gridSizes:Array<Int> = EKData.gridSizes;
 	public static var noteSplashOffsets:Map<Int, Array<Int>> = [
 		0 => [20, 10],
@@ -175,6 +173,13 @@ class Note extends FlxSprite
 			}
 		}
 
+	private function set_multSpeed(value:Float):Float {
+		resizeByRatio(value / multSpeed);
+		multSpeed = value;
+		//trace('fuck cock');
+		return value;
+	}
+
 	private function set_texture(value:String):String {
 		if(texture != value) {
 			reloadNote('', value);
@@ -267,7 +272,8 @@ class Note extends FlxSprite
 		if ((guitarSection && inCharter && noteData < 5) || (guitarSection)) notes = ['green', 'red', 'yellow', 'blue', 'orange'];
 
 		var notePathLol:String = 'notes/NOTE_assets';
-		noteSize = scales[mania];
+		noteSize = 
+			[mania];
 
 		if ((((CharactersWith3D.contains(PlayState.SONG.player2) && !musthit) || ((CharactersWith3D.contains(PlayState.SONG.player1)
 				|| CharactersWith3D.contains(PlayState.characteroverride) || CharactersWith3D.contains(PlayState.formoverride)) && musthit))
