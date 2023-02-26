@@ -1,20 +1,15 @@
 package;
 
 import flixel.input.keyboard.FlxKey;
-import flixel.FlxObject;
-import Controls.Device;
-import flixel.text.FlxText;
-import flixel.math.FlxRandom;
-import flixel.addons.effects.FlxSkewedSprite;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
-import PlayState;
+import flash.display.BitmapData;
+import editors.ChartingState;
 
 using StringTools;
-import StringTools;
 
 typedef EventNote = {
 	strumTime:Float,
@@ -25,50 +20,196 @@ typedef EventNote = {
 
 class Note extends FlxSprite
 {
+	//////////////////////////////////////////////////
+	//Extra keys stuff
+
+	//Important stuff
+	public static var gfxLetter:Array<String> = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
+												'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'];
+	public static var ammo:Array<Int> = EKData.gun;
+	public static var minMania:Int = 0;
+	public static var maxMania:Int = 17; // key value is this + 1
+
+	public static var scales:Array<Float> = EKData.scales;
+	public static var lessX:Array<Int> = EKData.lessX;
+	public static var separator:Array<Int> = EKData.noteSep;
+	public static var xtra:Array<Float> = EKData.offsetX;
+	public static var posRest:Array<Float> = EKData.restPosition;
+	public static var gridSizes:Array<Int> = EKData.gridSizes;
+	public static var noteSplashOffsets:Map<Int, Array<Int>> = [
+		0 => [20, 10],
+		9 => [10, 20]
+	];
+	public static var noteSplashScales:Array<Float> = EKData.splashScales;
+
+	public static var xmlMax:Int = 17; // This specifies the max of the splashes can go
+
+	public static var minManiaUI_integer:Int = minMania + 1;
+	public static var maxManiaUI_integer:Int = maxMania + 1;
+
+	public static var defaultMania:Int = 3;
+
+	// pixel notes
+	public static var pixelNotesDivisionValue:Int = 18;
+	public static var pixelScales:Array<Float> = EKData.pixelScales;
+
+	public static var keysShit:Map<Int, Map<String, Dynamic>> = EKData.keysShit;
+
+	// End of extra keys stuff
+	//////////////////////////////////////////////////
+
+	public var extraData:Map<String,Dynamic> = [];
 	public var strumTime:Float = 0;
 
 	public var mustPress:Bool = false;
-	public var finishedGenerating:Bool = false;
 	public var noteData:Int = 0;
 	public var canBeHit:Bool = false;
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
+	public var ignoreNote:Bool = false;
 	public var hitByOpponent:Bool = false;
+	public var noteWasHit:Bool = false;
 	public var prevNote:Note;
-	public var LocalScrollSpeed:Float = 1;
+	public var nextNote:Note;
+
+	public var spawned:Bool = false;
+
+	public var tail:Array<Note> = []; // for sustains
+	public var parent:Note;
+	public var blockHit:Bool = false; // only works for player
 
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
+	public var noteType(default, set):String = null;
 
-	private var CharactersWith3D:Array<String> = ["dave-angey", "bambi-3d", 'bambi-unfair', 'exbungo', 'expunged', 'dave-festival-3d', 'dave-3d-recursed', 'bf-3d', 'nofriend'];
+	public var eventName:String = '';
+	public var eventLength:Int = 0;
+	public var eventVal1:String = '';
+	public var eventVal2:String = '';
 
-	public var mania:Int = 0;
+	public var colorSwap:ColorSwap;
+	public var inEditor:Bool = false;
 
-	public static var widths:Array<Float> = [160, 140, 120, 110, 90, 70];
-	public static var scales:Array<Float> = [0.7, 0.65, 0.6, 0.55, 0.46, 0.36];
-	public static var posRest:Array<Int> = [0, 25, 35, 50, 70, 80];
+	public var animSuffix:String = '';
+	public var gfNote:Bool = false;
+	public var earlyHitMult:Float = 0.5;
+	public var lateHitMult:Float = 1;
+	public var lowPriority:Bool = false;
 
 	public static var swagWidth:Float = 160 * 0.7;
-	public static var noteSize:Float = 0.7;
 	public static var PURP_NOTE:Int = 0;
 	public static var GREEN_NOTE:Int = 2;
 	public static var BLUE_NOTE:Int = 1;
 	public static var RED_NOTE:Int = 3;
 
-	private var notetolookfor = 0;
+	// Lua shit
+	public var noteSplashDisabled:Bool = false;
+	public var noteSplashTexture:String = null;
+	public var noteSplashHue:Float = 0;
+	public var noteSplashSat:Float = 0;
+	public var noteSplashBrt:Float = 0;
 
-	public var originalType = 0;
+	public var offsetX:Float = 0;
+	public var offsetY:Float = 0;
+	public var offsetAngle:Float = 0;
+	public var multAlpha:Float = 1;
+	public var multSpeed(default, set):Float = 1;
 
-	public var MyStrum:StrumNote;
+	public var copyX:Bool = true;
+	public var copyY:Bool = true;
+	public var copyAngle:Bool = true;
+	public var copyAlpha:Bool = true;
 
-	public var noteStyle:String = 'normal';
+	public var hitHealth:Float = 0.023;
+	public var missHealth:Float = 0.0475;
+	public var rating:String = 'unknown';
+	public var ratingMod:Float = 0; //9 = unknown, 0.25 = shit, 0.5 = bad, 0.75 = good, 1 = sick
+	public var ratingDisabled:Bool = false;
 
-	public var guitarSection:Bool;
+	public var texture(default, set):String = null;
 
-	public var alphaMult:Float = 1.0;
-	public var noteOffset:Float = 0;
+	public var noAnimation:Bool = false;
+	public var noMissAnimation:Bool = false;
+	public var hitCausesMiss:Bool = false;
+	public var distance:Float = 2000; //plan on doing scroll directions soon -bb
 
-	var notes = ['purple', 'blue', 'green', 'red'];
+	public var hitsoundDisabled:Bool = false;
+	public var changeAnim:Bool = true;
+	public var changeColSwap:Bool = true;
+	
+	public function resizeByRatio(ratio:Float) //haha funny twitter shit
+		{
+			if(isSustainNote && !animation.curAnim.name.endsWith('tail'))
+			{
+				scale.y *= ratio;
+				updateHitbox();
+			}
+		}
+
+	private function set_multSpeed(value:Float):Float {
+		resizeByRatio(value / multSpeed);
+		multSpeed = value;
+		//trace('fuck cock');
+		return value;
+	}
+
+	public var mania:Int = 1;
+
+	var ogW:Float;
+	var ogH:Float;
+
+	var defaultWidth:Float = 0;
+	var defaultHeight:Float = 0;
+
+	private function set_texture(value:String):String {
+		if(texture != value) {
+			reloadNote('', value);
+		}
+		texture = value;
+		return value;
+	}
+
+
+	private function set_noteType(value:String):String {
+		noteSplashTexture = PlayState.SONG.splashSkin;
+		if (noteData > -1 && noteData < ClientPrefs.arrowHSV.length)
+		{
+			colorSwap.hue = ClientPrefs.arrowHSV[Std.int(Note.keysShit.get(mania).get('pixelAnimIndex')[noteData] % Note.ammo[mania])][0] / 360;
+			colorSwap.saturation = ClientPrefs.arrowHSV[Std.int(Note.keysShit.get(mania).get('pixelAnimIndex')[noteData] % Note.ammo[mania])][1] / 100;
+			colorSwap.brightness = ClientPrefs.arrowHSV[Std.int(Note.keysShit.get(mania).get('pixelAnimIndex')[noteData] % Note.ammo[mania])][2] / 100;
+		}
+
+		if(noteData > -1 && noteType != value) {
+			switch(value) {
+				case 'Hurt Note':
+					ignoreNote = mustPress;
+					reloadNote('HURT');
+					noteSplashTexture = 'HURTnoteSplashes';
+					colorSwap.hue = 0;
+					colorSwap.saturation = 0;
+					colorSwap.brightness = 0;
+					lowPriority = true;
+					if(isSustainNote) {
+						missHealth = 0.1;
+					} else {
+						missHealth = 0.3;
+					}
+					hitCausesMiss = true;
+				case 'Alt Animation':
+					animSuffix = '-alt';
+				case 'No Animation':
+					noAnimation = true;
+					noMissAnimation = true;
+				case 'GF Sing':
+					gfNote = true;
+			}
+			noteType = value;
+		}
+		noteSplashHue = colorSwap.hue;
+		noteSplashSat = colorSwap.saturation;
+		noteSplashBrt = colorSwap.brightness;
+		return value;
+	}
 
 	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?musthit:Bool = true, noteStyle:String = "normal", inCharter:Bool = false, guitarSection:Bool = false)
 	{
@@ -503,28 +644,92 @@ class Note extends FlxSprite
 		}
 	}
 
+	function loadNoteAnims() {
+		for (i in 0...gfxLetter.length)
+			{
+				animation.addByPrefix(gfxLetter[i], gfxLetter[i] + '0');
+	
+				if (isSustainNote)
+				{
+					animation.addByPrefix(gfxLetter[i] + ' hold', gfxLetter[i] + ' hold');
+					animation.addByPrefix(gfxLetter[i] + ' tail', gfxLetter[i] + ' tail');
+				}
+			}
+				
+			ogW = width;
+			ogH = height;
+			if (!isSustainNote)
+				setGraphicSize(Std.int(defaultWidth * scales[mania]));
+			else
+				setGraphicSize(Std.int(defaultWidth * scales[mania]), Std.int(defaultHeight * scales[0]));
+			updateHitbox();
+	}
+
+	function loadPixelNoteAnims() {
+		if(isSustainNote) {
+			for (i in 0...gfxLetter.length) {
+				animation.add(gfxLetter[i] + ' hold', [i]);
+				animation.add(gfxLetter[i] + ' tail', [i + pixelNotesDivisionValue]);
+			}
+		} else {
+			for (i in 0...gfxLetter.length) {
+				animation.add(gfxLetter[i], [i + pixelNotesDivisionValue]);
+			}
+		}
+	}
+
+	/*public function applyManiaChange()
+	{
+		if (isSustainNote) 
+			scale.y = 1;
+		reloadNote(texture);
+		if (isSustainNote)
+			offsetX = width / 2;
+		if (!isSustainNote)
+		{
+			var animToPlay:String = '';
+			animToPlay = Note.keysShit.get(mania).get('letters')[noteData % Note.ammo[mania]];
+			animation.play(animToPlay);
+		}
+
+		/*if (isSustainNote && prevNote != null) someone please tell me why this wont work
+		{
+			animation.play(Note.keysShit.get(mania).get('letters')[noteData % Note.ammo[mania]] + ' tail');
+			if (prevNote != null && prevNote.isSustainNote)
+			{
+				prevNote.animation.play(Note.keysShit.get(mania).get('letters')[prevNote.noteData % Note.ammo[mania]] + ' hold');
+				prevNote.updateHitbox();
+			}
+		}
+
+		updateHitbox();
+	}*/
+
+
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 
-		if (MyStrum != null)
+		mania = PlayState.mania;
+
+		/* im so stupid for that
+		if (noteData == 9)
 		{
-			GoToStrum(MyStrum);
+			if (animation.curAnim != null)
+				trace(animation.curAnim.name);
+			else trace("te anim is null waaaaaa");
+
+			trace(Note.keysShit.get(mania).get('letters')[noteData]);
 		}
-		else
+		*/
+
+		if (mustPress)
 		{
-			if (isInState('PlayState'))
-			{
-				SearchForStrum(mustPress);
-			}
-		}
-		if (mustPress && isInState('PlayState'))
-		{
-			// The * 0.5 is so that it's easier to hit them too late, instead of too early
-			if (strumTime > Conductor.songPosition - Conductor.safeZoneOffset
-				&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.5))
+			// ok river
+			if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * lateHitMult)
+				&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult))
 				canBeHit = true;
-			else 
+			else
 				canBeHit = false;
 
 			if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
@@ -534,67 +739,17 @@ class Note extends FlxSprite
 		{
 			canBeHit = false;
 
-			if (strumTime <= Conductor.songPosition)
-				wasGoodHit = true;
-		}
-
-		if (tooLate)
-		{
-			alphaMult = 0.3;
-		}
-	}
-	public function GoToStrum(strum:StrumNote)
-	{
-		x = strum.x + noteOffset;
-		alpha = strum.alpha * alphaMult;
-
-		if (strum.pressingKey5)
-		{
-			if (noteStyle != "shape")
+			if (strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult))
 			{
-				alpha *= 0.5;
+				if((isSustainNote && prevNote.wasGoodHit) || strumTime <= Conductor.songPosition)
+					wasGoodHit = true;
 			}
 		}
-		else
-		{
-			if (noteStyle == "shape")
-			{
-				alpha *= 0.5;
-			}
-		}
-	}
 
-	public function isInState(state:String)
-	{
-		return Type.getClassName(Type.getClass(FlxG.state)).contains(state);
-	}
-
-	public function SearchForStrum(musthit:Bool)
-	{
-		var state:PlayState = cast(FlxG.state, PlayState);
-		if (musthit)
+		if (tooLate && !inEditor)
 		{
-			state.playerStrums.forEach(function(spr:StrumNote)
-			{
-				if (spr.ID == notetolookfor)
-				{
-					GoToStrum(spr);
-					MyStrum = spr;
-					return;
-				}
-			});
-		}
-		else
-		{
-			state.dadStrums.forEach(function(spr:StrumNote)
-			{
-				if (spr.ID == notetolookfor)
-				{
-					GoToStrum(spr);
-					MyStrum = spr;
-					return;
-				}
-			});
+			if (alpha > 0.3)
+				alpha = 0.3;
 		}
 	}
 }
