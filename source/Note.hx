@@ -551,7 +551,7 @@ class Note extends FlxSprite
 		}
 		if (isInState('PlayState'))
 		{
-			SearchForStrum(musthit);
+
 		}
 
 		if (isSustainNote && prevNote != null)
