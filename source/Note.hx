@@ -6,6 +6,7 @@ import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
+import flixel.math.FlxRandom;
 import flash.display.BitmapData;
 import editors.ChartingState;
 
@@ -20,10 +21,8 @@ typedef EventNote = {
 
 class Note extends FlxSprite
 {
-	//////////////////////////////////////////////////
-	//Extra keys stuff
+	public var LocalScrollSpeed:Float = 1;
 
-	//Important stuff
 	public static var gfxLetter:Array<String> = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
 												'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'];
 	public static var ammo:Array<Int> = EKData.gun;
@@ -80,6 +79,30 @@ class Note extends FlxSprite
 
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
+
+	private var CharactersWith3D:Array<String> = ["dave-angey", "bambi-3d", 'bambi-unfair', 'exbungo', 'expunged', 'dave-festival-3d', 'dave-3d-recursed', 'bf-3d', 'nofriend'];
+
+	public var mania:Int = 0;
+
+	public static var widths:Array<Float> = [160, 140, 120, 110, 90, 70];
+	public static var scales:Array<Float> = [0.7, 0.65, 0.6, 0.55, 0.46, 0.36];
+	public static var posRest:Array<Int> = [0, 25, 35, 50, 70, 80];
+
+	public static var swagWidth:Float = 160 * 0.7;
+	public static var noteSize:Float = 0.7;
+	public static var PURP_NOTE:Int = 0;
+	public static var GREEN_NOTE:Int = 2;
+	public static var BLUE_NOTE:Int = 1;
+	public static var RED_NOTE:Int = 3;
+
+	private var notetolookfor = 0;
+
+	public var originalType = 0;
+
+	public var MyStrum:StrumNote;
+
+	public var noteStyle:String = 'normal';
+
 	public var noteType(default, set):String = null;
 
 	public var eventName:String = '';
@@ -136,7 +159,11 @@ class Note extends FlxSprite
 	public var hitsoundDisabled:Bool = false;
 	public var changeAnim:Bool = true;
 	public var changeColSwap:Bool = true;
-	
+
+	public var noteOffset:Float = 0;
+
+	var notes = ['purple', 'blue', 'green', 'red'];
+
 	public function resizeByRatio(ratio:Float) //haha funny twitter shit
 		{
 			if(isSustainNote && !animation.curAnim.name.endsWith('tail'))
@@ -169,6 +196,37 @@ class Note extends FlxSprite
 		return value;
 	}
 
+	public function resizeByRatio(ratio:Float) //haha funny twitter shit
+		{
+			if(isSustainNote && !animation.curAnim.name.endsWith('tail'))
+			{
+				scale.y *= ratio;
+				updateHitbox();
+			}
+		}
+
+	private function set_multSpeed(value:Float):Float {
+		resizeByRatio(value / multSpeed);
+		multSpeed = value;
+		//trace('fuck cock');
+		return value;
+	}
+
+	public var mania:Int = 1;
+
+	var ogW:Float;
+	var ogH:Float;
+
+	var defaultWidth:Float = 0;
+	var defaultHeight:Float = 0;
+
+	private function set_texture(value:String):String {
+		if(texture != value) {
+			reloadNote('', value);
+		}
+		texture = value;
+		return value;
+	}
 
 	private function set_noteType(value:String):String {
 		noteSplashTexture = PlayState.SONG.splashSkin;
@@ -478,7 +536,20 @@ class Note extends FlxSprite
 				str = 'cheating';
 			}
 		}
-		if (str == 'cheating' && PlayState.modchartoption) {
+		if(noteData > -1) {
+			texture = '';
+			colorSwap = new ColorSwap();
+			shader = colorSwap.shader;
+
+			x += swagWidth * (noteData % Note.ammo[mania]);
+			if(!isSustainNote && noteData > -1 && noteData < Note.maxManiaUI_integer) { //Doing this 'if' check to fix the warnings on Senpai songs
+				var animToPlay:String = '';
+				animToPlay = Note.keysShit.get(mania).get('letters')[noteData];
+				animation.play(animToPlay);
+			}
+		}
+		}
+		if (str == 'cheating') {
 			if (mania == 0) {
 				switch (originalType)
 				{
@@ -543,104 +614,129 @@ class Note extends FlxSprite
 		{
 			SearchForStrum(musthit);
 		}
-		if (!isSustainNote) {
-			if (!PlayState.modchartoption) {
-				if (PlayState.SONG.song.toLowerCase() == 'cheating')
-					LocalScrollSpeed = 0.75; // target practice old
-				if (PlayState.SONG.song.toLowerCase() == 'kabunga')
-					LocalScrollSpeed = 0.81;
-			}
-			if (PlayState.SONG.song.toLowerCase() == 'unfairness')
-			{
-				if (PlayState.modchartoption) {
-					var rng:FlxRandom = new FlxRandom();
-					if (rng.int(0, 120) == 1)
-					{
-						LocalScrollSpeed = 0.1;
-					}
-					else
-					{
-						LocalScrollSpeed = rng.float(1, 3);
-					}
-				} else {
-					LocalScrollSpeed = 2;
-				}
-			}
-			if (PlayState.SONG.song.toLowerCase() == 'exploitation')
-			{
-				if (PlayState.modchartoption) {
-					var rng:FlxRandom = new FlxRandom();
-					if (rng.int(0, 484) == 1)
-					{
-						LocalScrollSpeed = 0.1;
-					}
-					else
-					{
-						LocalScrollSpeed = rng.float(2.9, 3.6);
-					}
-				} else {
-					LocalScrollSpeed = 3;
-				}
-			}
-		}
 
 		if (isSustainNote && prevNote != null)
 		{
-			alphaMult = 0.6;
+			alpha = 0.6;
+			multAlpha = 0.6;
+			hitsoundDisabled = true;
+			if(ClientPrefs.downScroll) flipY = true;
 
-			noteOffset += width / 2;
+			offsetX += width / 2;
+			copyAngle = false;
 
-			animation.play(notes[noteData % Main.keyAmmo[mania]] + 'holdend');
-
-			if (PlayState.scrollType == 'downscroll')
-			{
-				flipY = true;
-			}
+			animation.play(Note.keysShit.get(mania).get('letters')[noteData] + ' tail');
 
 			updateHitbox();
 
-			noteOffset -= width / 2;
+			offsetX -= width / 2;
 
-			LocalScrollSpeed = prevNote.LocalScrollSpeed;
-
-			var noteSpeed = (LocalScrollSpeed == 0 ? 1 : LocalScrollSpeed);
+			if (PlayState.isPixelStage)
+				offsetX += 30 * Note.pixelScales[mania];
 
 			if (prevNote.isSustainNote)
 			{
-				prevNote.animation.play(notes[prevNote.noteData] + 'hold');
+				prevNote.animation.play(Note.keysShit.get(mania).get('letters')[prevNote.noteData] + ' hold');
 
-				if (noteStyle != 'shape')
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05;
+				if(PlayState.instance != null)
 				{
-					prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.SONG.speed * noteSpeed * (0.7 / noteSize);
-					// prevNote.scale.y *= (Conductor.stepCrochet / 100) * PlayState.SONG.speed * 1.5;
-					prevNote.updateHitbox();
+					prevNote.scale.y *= PlayState.instance.songSpeed;
 				}
-				else
-				{
-					//INCOMPLETE
-					prevNote.scale.y *= Conductor.stepCrochet / 100 * 0.75 * PlayState.SONG.speed * noteSpeed * (0.7 / noteSize);
-					prevNote.scale.x *= Conductor.stepCrochet / 100 * 0.5 * PlayState.SONG.speed * noteSpeed * (0.7 / noteSize);
-					// prevNote.scale.y *= (Conductor.stepCrochet / 100) * PlayState.SONG.speed * 0.75;
-					// prevNote.scale.x *= (Conductor.stepCrochet / 100) * PlayState.SONG.speed * 0.5;
-					prevNote.offset.y += prevNote.height / 3;
-					prevNote.updateHitbox();
+
+				if(PlayState.isPixelStage) { ///Y E  A H
+					prevNote.scale.y *= 1.19;
+					prevNote.scale.y *= (6 / height); //Auto adjust note size
 				}
+				prevNote.updateHitbox();
+				// prevNote.setGraphicSize();
+			}
+
+			if(PlayState.isPixelStage) {
+				scale.y *= PlayState.daPixelZoom;
+				updateHitbox();
+			}
+		} else if(!isSustainNote) {
+			earlyHitMult = 1;
+		}
+		x += offsetX;
+	}
+
+	var lastNoteOffsetXForPixelAutoAdjusting:Float = 0;
+	var lastNoteScaleToo:Float = 1;
+	public var originalHeightForCalcs:Float = 6;
+	function reloadNote(?prefix:String = '', ?texture:String = '', ?suffix:String = '') {
+		if(prefix == null) prefix = '';
+		if(texture == null) texture = '';
+		if(suffix == null) suffix = '';
+		
+		var skin:String = texture;
+		if(texture.length < 1) {
+			skin = PlayState.SONG.arrowSkin;
+			if(skin == null || skin.length < 1) {
+				skin = 'NOTE_assets';
 			}
 		}
-		if (noteStyle == 'shape')
-		{
-			switch (noteData)
-			{
-				/* case 1:
-					noteOffset += 4;
-				case 2:
-					noteOffset += 10; */
+
+		var animName:String = null;
+		if(animation.curAnim != null) {
+			animName = animation.curAnim.name;
+		}
+
+		var arraySkin:Array<String> = skin.split('/');
+		arraySkin[arraySkin.length-1] = prefix + arraySkin[arraySkin.length-1] + suffix;
+
+		var lastScaleY:Float = scale.y;
+		var blahblah:String = arraySkin.join('/');
+
+		defaultWidth = 157;
+		defaultHeight = 154;
+		if(PlayState.isPixelStage) {
+			if(isSustainNote) {
+				loadGraphic(Paths.image('pixelUI/' + blahblah + 'ENDS'));
+				width = width / pixelNotesDivisionValue;
+				height = height / 2;
+				originalHeightForCalcs = height;
+				loadGraphic(Paths.image('pixelUI/' + blahblah + 'ENDS'), true, Math.floor(width), Math.floor(height));
+			} else {
+				loadGraphic(Paths.image('pixelUI/' + blahblah));
+				width = width / pixelNotesDivisionValue;
+				height = height / 5;
+				loadGraphic(Paths.image('pixelUI/' + blahblah), true, Math.floor(width), Math.floor(height));
 			}
-			if (isSustainNote)
-			{
-				alphaMult = 1;
-				noteOffset += (width / 2);
+			defaultWidth = width;
+			setGraphicSize(Std.int(width * PlayState.daPixelZoom * Note.pixelScales[mania]));
+			loadPixelNoteAnims();
+			antialiasing = false;
+
+			if(isSustainNote) {
+				offsetX += lastNoteOffsetXForPixelAutoAdjusting;
+				lastNoteOffsetXForPixelAutoAdjusting = (width - 7) * (PlayState.daPixelZoom / 2);
+				offsetX -= lastNoteOffsetXForPixelAutoAdjusting;
+				
+				/*if(animName != null && !animName.endsWith('tail'))
+				{
+					lastScaleY /= lastNoteScaleToo;
+					lastNoteScaleToo = (6 / height);
+					lastScaleY *= lastNoteScaleToo; 
+				}*/
 			}
+		} else {
+			frames = Paths.getSparrowAtlas(blahblah);
+			loadNoteAnims();
+			antialiasing = ClientPrefs.globalAntialiasing;
+		}
+		if(isSustainNote) {
+			scale.y = lastScaleY;
+		}
+		updateHitbox();
+
+		if(animName != null)
+			animation.play(animName, true);
+
+		if(inEditor) {
+			setGraphicSize(ChartingState.GRID_SIZE, ChartingState.GRID_SIZE);
+			updateHitbox();
 		}
 	}
 
