@@ -268,7 +268,6 @@ class Note extends FlxSprite
 		if (mania == 5) notes = ['purple', 'blue', 'green', 'red', 'pink', 'turq', 'emerald', 'lightred', 'yellow', 'violet', 'black', 'dark'];
 
 		var notePathLol:String = 'notes/NOTE_assets';
-		noteSize = [mania];
 		{
 			this.noteStyle = '3D';
 			notePathLol = 'notes/NOTE_assets_3D';
