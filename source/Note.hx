@@ -548,7 +548,6 @@ class Note extends FlxSprite
 				animation.play(animToPlay);
 			}
 		}
-		}
 		if (str == 'cheating') {
 			if (mania == 0) {
 				switch (originalType)
