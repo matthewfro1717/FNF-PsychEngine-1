@@ -16,6 +16,13 @@ import PlayState;
 using StringTools;
 import StringTools;
 
+typedef EventNote = {
+	strumTime:Float,
+	event:String,
+	value1:String,
+	value2:String
+}
+
 class Note extends FlxSprite
 {
 	public var strumTime:Float = 0;
