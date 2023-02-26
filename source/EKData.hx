@@ -83,39 +83,40 @@ class EKData {
                 "pixelAnimIndex" => [0, 1, 2, 3, 9, 10, 13, 11, 12, 5, 6, 7, 8]
             ],
         ],
-	];
-
-    
-    public static var scales:Array<Float> = [
-		0.9, // 1k
-		0.85, //2k
-		0.8, //3k
-		0.7, //4k
-		0.66, //5k
-		0.6, //6k
-		0.55, //7k
-		0.50, //8k
-		0.46, //9k
-		0.39, //10k
-		0.36, //11k
-		0.32, //12k
-    ]; 
-	public static var lessX:Array<Int> = [
-		0, // 1k
-		0, // 2k
-		0, //3k
-		0, //4k
-		0, //5k
-		8, //6k
-		7, //7k
-		8, //8k
-		8, //9k
-		7, //10k
-		6, //11k
-		6, //12k
     ];
 
-    public static var noteSep:Array<Int> = [
+    
+public static var scales:Array<Float> = [
+        0.9, // 1k
+        0.85, //2k
+        0.8, //3k
+        0.7, //4k
+        0.66, //5k
+        0.6, //6k
+        0.55, //7k
+        0.50, //8k
+        0.46, //9k
+	0.39, //10k
+	0.36, //11k
+	0.32, //12k
+    ];
+
+public static var lessX:Array<Int> = [
+        0, // 1k
+        0, // 2k
+	0, //3k
+	0, //4k
+	0, //5k
+	8, //6k
+	7, //7k
+	8, //8k
+	8, //9k
+	7, //10k
+	6, //11k
+	6, //12k
+    ];
+
+public static var noteSep:Array<Int> = [
         0, //1k
         0, //2k
         1, //3k
@@ -130,7 +131,7 @@ class EKData {
         5, //12k
     ];
 
-    public static var offsetX:Array<Float> = [
+public static var offsetX:Array<Float> = [
         150, //1k
         89,//2k
         0, //3k
@@ -145,8 +146,8 @@ class EKData {
         0, //12k
     ];
 
-    // i wont comment fuck you
-    public static var gun:Array<Int> = [
+// i wont comment fuck you
+public static var gun:Array<Int> = [
         1, 
         2, 
         3, 
@@ -161,7 +162,7 @@ class EKData {
         12
     ];
 
-    public static var restPosition:Array<Float> = [
+public static var restPosition:Array<Float> = [
         0, //1k
         0, //2k
         0, //3k
@@ -176,7 +177,7 @@ class EKData {
         30, //12k
     ];
 
-    public static var gridSizes:Array<Int> = [
+public static var gridSizes:Array<Int> = [
         40, //1k
         40, //2k
         40, //3k
@@ -191,7 +192,7 @@ class EKData {
         25, //12k
     ];
 
-    public static var splashScales:Array<Float> = [
+public static var splashScales:Array<Float> = [
         1.3, //1k
         1.2, //2k
         1.1, //3k
@@ -206,7 +207,7 @@ class EKData {
         0.3, //12k
     ];
 
-    public static var pixelScales:Array<Float> = [
+public static var pixelScales:Array<Float> = [
         1.2, //1k
         1.15, //2k
         1.1, //3k
