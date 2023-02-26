@@ -119,12 +119,6 @@ class Note extends FlxSprite
 	public var lateHitMult:Float = 1;
 	public var lowPriority:Bool = false;
 
-	public static var swagWidth:Float = 160 * 0.7;
-	public static var PURP_NOTE:Int = 0;
-	public static var GREEN_NOTE:Int = 2;
-	public static var BLUE_NOTE:Int = 1;
-	public static var RED_NOTE:Int = 3;
-
 	// Lua shit
 	public var noteSplashDisabled:Bool = false;
 	public var noteSplashTexture:String = null;
@@ -164,22 +158,6 @@ class Note extends FlxSprite
 
 	var notes = ['purple', 'blue', 'green', 'red'];
 
-	public function resizeByRatio(ratio:Float) //haha funny twitter shit
-		{
-			if(isSustainNote && !animation.curAnim.name.endsWith('tail'))
-			{
-				scale.y *= ratio;
-				updateHitbox();
-			}
-		}
-
-	private function set_multSpeed(value:Float):Float {
-		resizeByRatio(value / multSpeed);
-		multSpeed = value;
-		//trace('fuck cock');
-		return value;
-	}
-
 	public var mania:Int = 1;
 
 	var ogW:Float;
@@ -187,14 +165,6 @@ class Note extends FlxSprite
 
 	var defaultWidth:Float = 0;
 	var defaultHeight:Float = 0;
-
-	private function set_texture(value:String):String {
-		if(texture != value) {
-			reloadNote('', value);
-		}
-		texture = value;
-		return value;
-	}
 
 	public function resizeByRatio(ratio:Float) //haha funny twitter shit
 		{
@@ -204,21 +174,6 @@ class Note extends FlxSprite
 				updateHitbox();
 			}
 		}
-
-	private function set_multSpeed(value:Float):Float {
-		resizeByRatio(value / multSpeed);
-		multSpeed = value;
-		//trace('fuck cock');
-		return value;
-	}
-
-	public var mania:Int = 1;
-
-	var ogW:Float;
-	var ogH:Float;
-
-	var defaultWidth:Float = 0;
-	var defaultHeight:Float = 0;
 
 	private function set_texture(value:String):String {
 		if(texture != value) {
@@ -269,7 +224,7 @@ class Note extends FlxSprite
 		return value;
 	}
 
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?musthit:Bool = true, noteStyle:String = "normal", inCharter:Bool = false, guitarSection:Bool = false)
+	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?musthit:Bool = true, noteStyle:String = "normal", inCharter:Bool = false)
 	{
 		mania = PlayState.SONG.mania;
 		swagWidth = widths[mania] * 0.7; //factor not the same as noteScale
@@ -602,12 +557,6 @@ class Note extends FlxSprite
 				flipY = (Math.round(Math.random()) == 0); // fuck you
 				flipX = (Math.round(Math.random()) == 1);
 			}
-		} else {
-			var not = originalType % Main.keyAmmo[mania];
-			if (guitarSection) not = originalType;
-			x += swagWidth * not;
-			notetolookfor = not;
-			animation.play(notes[not] + 'Scroll');
 		}
 		if (isInState('PlayState'))
 		{
@@ -771,6 +720,11 @@ class Note extends FlxSprite
 				animation.add(gfxLetter[i], [i + pixelNotesDivisionValue]);
 			}
 		}
+	}
+
+	public function isInState(state:String)
+	{
+		return Type.getClassName(Type.getClass(FlxG.state)).contains(state);
 	}
 
 	/*public function applyManiaChange()
