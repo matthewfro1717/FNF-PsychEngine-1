@@ -713,31 +713,6 @@ class Note extends FlxSprite
 		}
 	}
 
-	/*public function applyManiaChange()
-	{
-		if (isSustainNote) 
-			scale.y = 1;
-		reloadNote(texture);
-		if (isSustainNote)
-			offsetX = width / 2;
-		if (!isSustainNote)
-		{
-			var animToPlay:String = '';
-			animToPlay = Note.keysShit.get(mania).get('letters')[noteData % Note.ammo[mania]];
-			animation.play(animToPlay);
-		}
-
-		/*if (isSustainNote && prevNote != null) someone please tell me why this wont work
-		{
-			animation.play(Note.keysShit.get(mania).get('letters')[noteData % Note.ammo[mania]] + ' tail');
-			if (prevNote != null && prevNote.isSustainNote)
-			{
-				prevNote.animation.play(Note.keysShit.get(mania).get('letters')[prevNote.noteData % Note.ammo[mania]] + ' hold');
-				prevNote.updateHitbox();
-			}
-		}
-	}
-
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
