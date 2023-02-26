@@ -294,7 +294,7 @@ class Note extends FlxSprite
 					this.noteStyle = 'recursed';
 					notePathLol = 'notes/NOTE_recursed';
 				}
-		}\
+		}
 		switch (this.noteStyle)
 		{
 			default:
