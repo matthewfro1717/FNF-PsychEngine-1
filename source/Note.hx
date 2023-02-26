@@ -713,28 +713,34 @@ class Note extends FlxSprite
 		}
 	}
 
+	public function isInState(state:String)
+	{
+		return Type.getClassName(Type.getClass(FlxG.state)).contains(state);
+	}
+
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 
-		if (MyStrum != null)
+		mania = PlayState.mania;
+
+		/* im so stupid for that
+		if (noteData == 9)
 		{
-			GoToStrum(MyStrum);
+			if (animation.curAnim != null)
+				trace(animation.curAnim.name);
+			else trace("te anim is null waaaaaa");
+			trace(Note.keysShit.get(mania).get('letters')[noteData]);
 		}
-		else
+		*/
+
+		if (mustPress)
 		{
-			if (isInState('PlayState'))
-			{
-				SearchForStrum(mustPress);
-			}
-		}
-		if (mustPress && isInState('PlayState'))
-		{
-			// The * 0.5 is so that it's easier to hit them too late, instead of too early
-			if (strumTime > Conductor.songPosition - Conductor.safeZoneOffset
-				&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.5))
+			// ok river
+			if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * lateHitMult)
+				&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult))
 				canBeHit = true;
-			else 
+			else
 				canBeHit = false;
 
 			if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
@@ -744,67 +750,17 @@ class Note extends FlxSprite
 		{
 			canBeHit = false;
 
-			if (strumTime <= Conductor.songPosition)
-				wasGoodHit = true;
-		}
-
-		if (tooLate)
-		{
-			alphaMult = 0.3;
-		}
-	}
-	public function GoToStrum(strum:StrumNote)
-	{
-		x = strum.x + noteOffset;
-		alpha = strum.alpha * alphaMult;
-
-		if (strum.pressingKey5)
-		{
-			if (noteStyle != "shape")
+			if (strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult))
 			{
-				alpha *= 0.5;
+				if((isSustainNote && prevNote.wasGoodHit) || strumTime <= Conductor.songPosition)
+					wasGoodHit = true;
 			}
 		}
-		else
-		{
-			if (noteStyle == "shape")
-			{
-				alpha *= 0.5;
-			}
-		}
-	}
 
-	public function isInState(state:String)
-	{
-		return Type.getClassName(Type.getClass(FlxG.state)).contains(state);
-	}
-
-	public function SearchForStrum(musthit:Bool)
-	{
-		var state:PlayState = cast(FlxG.state, PlayState);
-		if (musthit)
+		if (tooLate && !inEditor)
 		{
-			state.playerStrums.forEach(function(spr:StrumNote)
-			{
-				if (spr.ID == notetolookfor)
-				{
-					GoToStrum(spr);
-					MyStrum = spr;
-					return;
-				}
-			});
-		}
-		else
-		{
-			state.dadStrums.forEach(function(spr:StrumNote)
-			{
-				if (spr.ID == notetolookfor)
-				{
-					GoToStrum(spr);
-					MyStrum = spr;
-					return;
-				}
-			});
+			if (alpha > 0.3)
+				alpha = 0.3;
 		}
 	}
 }
